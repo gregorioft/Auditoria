@@ -1,0 +1,160 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "source": [
+        "[Github Repo](https://github.com/galax19ksh/Iris-Flower-Classification)"
+      ],
+      "metadata": {
+        "id": "PhFECFJZHQTC"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "###Import Libraries and Load Data"
+      ],
+      "metadata": {
+        "id": "cuGNZuH3F5e0"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install paho-mqtt\n",
+        "\n",
+        "import paho.mqtt.client as mqtt\n",
+        "import time\n",
+        "\n",
+        "def on_connect(client, userdata, flags, rc, properties=None):\n",
+        "    print(f\"Conectado con código de resultado: {rc}\")\n",
+        "\n",
+        "    # Suscribirse al tema después de la conexión exitosa\n",
+        "    client.subscribe(\"casa/sala/temperatura\")\n",
+        "\n",
+        "\n",
+        "def on_message(client, userdata, msg):\n",
+        "    print(f\"Mensaje recibido en el tema '{msg.topic}': {msg.payload.decode()}\")\n",
+        "\n",
+        "\n",
+        "subscriber_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)\n",
+        "\n",
+        "subscriber_client.on_connect = on_connect\n",
+        "subscriber_client.on_message = on_message\n",
+        "\n",
+        "# Conectar al mismo broker\n",
+        "subscriber_client.connect(\"broker.hivemq.com\", 1883, 60)\n",
+        "\n",
+        "# Bucle en segundo plano para procesar mensajes\n",
+        "subscriber_client.loop_start()\n",
+        "\n",
+        "print(\"Cliente suscriptor iniciado. Esperando mensajes...\")\n",
+        "\n",
+        "# Mantener el script en ejecución para recibir mensajes por un tiempo limitado\n",
+        "timeout_seconds = 10\n",
+        "start_time = time.time()\n",
+        "\n",
+        "try:\n",
+        "    while (time.time() - start_time) < timeout_seconds:\n",
+        "        time.sleep(1)\n",
+        "\n",
+        "    print(f\"\\nSuscriptor detenido automáticamente después de {timeout_seconds} segundos.\")\n",
+        "\n",
+        "except KeyboardInterrupt:\n",
+        "    print(\"\\nSuscriptor detenido manualmente.\")\n",
+        "\n",
+        "finally:\n",
+        "    subscriber_client.loop_stop()\n",
+        "    subscriber_client.disconnect()"
+      ],
+      "metadata": {
+        "id": "kkZqcYJQKtdE",
+        "outputId": "7c9b56fd-e685-4bc1-a240-d996197e23b2",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "execution_count": 12,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Requirement already satisfied: paho-mqtt in /usr/local/lib/python3.13/dist-packages (2.1.0)\n",
+            "Cliente suscriptor iniciado. Esperando mensajes...\n",
+            "Conectado con código de resultado: Success\n",
+            "Mensaje recibido en el tema 'casa/sala/temperatura': 26\n",
+            "\n",
+            "Suscriptor detenido automáticamente después de 10 segundos.\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# -*- coding: utf-8 -*-\n",
+        "\"\"\"\n",
+        "extra-lsb.ipynb\n",
+        "\"\"\"\n",
+        "\n",
+        "# Solicitar un texto corto\n",
+        "texto = input(\"Escribe un texto corto: \")\n",
+        "\n",
+        "print(\"\\nCarácter | Decimal | Binario | LSB\")\n",
+        "print(\"----------------------------------------\")\n",
+        "\n",
+        "bits_lsb = \"\"\n",
+        "\n",
+        "for caracter in texto:\n",
+        "    valor_decimal = ord(caracter)\n",
+        "    valor_binario = format(valor_decimal, \"08b\")\n",
+        "\n",
+        "    # El LSB se obtiene con una operación AND con 1\n",
+        "    lsb = valor_decimal & 1\n",
+        "\n",
+        "    bits_lsb += str(lsb)\n",
+        "\n",
+        "    print(f\"{repr(caracter):9} | {valor_decimal:7} | {valor_binario} | {lsb}\")"
+      ],
+      "metadata": {
+        "id": "D7aJ8-jjN-E0",
+        "outputId": "c891f48f-ce46-4a9a-e49e-590b35b8f532",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "execution_count": 14,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Escribe un texto corto: hola\n",
+            "\n",
+            "Carácter | Decimal | Binario | LSB\n",
+            "----------------------------------------\n",
+            "'h'       |     104 | 01101000 | 0\n",
+            "'o'       |     111 | 01101111 | 1\n",
+            "'l'       |     108 | 01101100 | 0\n",
+            "'a'       |      97 | 01100001 | 1\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
